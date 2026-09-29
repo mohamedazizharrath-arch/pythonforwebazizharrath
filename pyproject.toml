@@ -1,0 +1,20 @@
+[project]
+name = "3ia"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "mohamedazizharrath-arch", email = "mohamedaziz.harrath@etudiant-isi.utm.tn" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "django==5.2.*",
+    "python-dotenv>=1.2.3",
+]
+
+[project.scripts]
+3ia = "3ia:main"
+
+[build-system]
+requires = ["uv_build>=0.12.17,<0.13.0"]
+build-backend = "uv_build"
