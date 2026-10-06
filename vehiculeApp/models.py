@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.core.validators import   MinValueValidator , MaxValueValidator 
 
 class Vehicule(models.Model):
 
@@ -13,7 +13,7 @@ class Vehicule(models.Model):
         
     )
 
-    capacite_kg = models.PositiveIntegerField()
+    capacite_kg = models.PositiveIntegerField(validators=[MinValueValidator(1, "La capacité doit être supérieure à 0"), MaxValueValidator(1000, "La capacité ne peut pas dépasser 1000")])
 
     disponible = models.BooleanField(
         default=True
