@@ -16,12 +16,36 @@ matrricule_fiscale_validator = RegexValidator(
 )
 # Create your models here.
 class Utilisateur(AbstractUser):
-    user_id = models.CharField(max_length=8, primary_key=True)
+    user_id = models.CharField(max_length=12, primary_key=True,blank=True,editable=False)
     email = models.EmailField(unique=True, validators=[validate_email])
     telephone = models.CharField(max_length=15, blank=True, null=True)
     role = models.CharField(max_length=20, choices=[('admin', 'Admin'), ('c', 'chargeur') , ('t', 'tansporteur')], default='c')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def _generate_reference(cls):
+            annee = timezone.now().strftime("%Y")
+            prefix = f"{annee}-USER-"
+            dernier = (
+                #cls.objects.all() #select * from expedition
+                cls.objects.filter(user_id__startswith=prefix)
+                .order_by('user_id')#- pour inverser l'ordre (first)
+                .last()
+            )
+            
+            compteur =int(dernier.user_id[-2:])+ 1 if dernier else 0
+            
+            if compteur > 99:
+                    compteur = 0  
+            return f"{prefix}{compteur:02d}"
+            
+    def save(self, *args, **kwargs):
+            if not self.user_id:
+                self.user_id = self._generate_reference()
+            #fct appele pour appliquer validators 
+            self.full_clean()  # Valide les champs avant de sauvegarder
+            super().save(*args, **kwargs)
     
 class Entreprise(models.Model):
     raison_sociale = models.CharField(max_length=200,blank=False, null=False)
@@ -32,27 +56,4 @@ class Entreprise(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     geraant = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, related_name='entreprise', null=True, blank=True)
 
-    @classmethod
-
-    def _generate_reference(cls):
-        annee = timezone.now().strftime("%Y")
-        prefix = f"{annee}-USER-"
-        dernier = (
-            #cls.objects.all() #select * from expedition
-            cls.objects.filter(reference__startswith=prefix)
-            .order_by('user_id')#- pour inverser l'ordre (first)
-            .last()
-        )
-        
-        compteur =( int(dernier.reference[-2:]+1) if dernier else 0
-        )
-        if compteur > 99:
-                compteur = 0  
-        return f"{prefix}{compteur:02d}"
-        
-    def save(self, *args, **kwargs):
-        if not self.reference:
-            self.reference = self._generate_reference()
-        #fct appele pour appliquer validators 
-        self.full_clean()  # Valide les champs avant de sauvegarder
-        super().save(*args, **kwargs)
+  

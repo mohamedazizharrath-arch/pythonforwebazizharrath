@@ -2,6 +2,7 @@ from datetime import timezone
 
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class Expedition(models.Model):
